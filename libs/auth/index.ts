@@ -15,13 +15,13 @@ export function setJwtToken(token: string) {
 	localStorage.setItem('accessToken', token);
 }
 
-export const logIn = async (nick: string, password: string): Promise<void> => {
+export const logIn = async (nick: string, password: string): Promise<void> => { // Join.tsx ni ichiga yartb olganmz metodni
 	try {
 		const { jwtToken } = await requestJwtToken({ nick, password });
 
 		if (jwtToken) {
 			updateStorage({ jwtToken });
-			updateUserInfo(jwtToken);
+			updateUserInfo(jwtToken); // Decode qiladi
 		}
 	} catch (err) {
 		console.warn('login err', err);
@@ -156,6 +156,7 @@ export const updateUserInfo = (jwtToken: any) => {
 export const logOut = () => {
 	deleteStorage();
 	deleteUserInfo();
+	window.location.reload();
 };
 
 const deleteStorage = () => {

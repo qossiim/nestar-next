@@ -13,7 +13,7 @@ import '../scss/mobile/main.scss';
 const App = ({ Component, pageProps }: AppProps) => {
 	// @ts-ignore
 	const [theme, setTheme] = useState(createTheme(light));
-	const client = useApollo(pageProps.initialApolloState);
+	const client = useApollo(pageProps.initialApolloState); // APOLLO CLEINT IS BEING CREATED. Yagona Client qurdik
 
 	return (
 		<ApolloProvider client={client}>

@@ -9,15 +9,15 @@ import { TokenRefreshLink } from 'apollo-link-token-refresh';
 let apolloClient: ApolloClient<NormalizedCacheObject>;
 
 function getHeaders() {
-	const headers = {} as HeadersInit;
-	const token = getJwtToken();
+	const headers = {} as HeadersInit; // type assertion qilyabmiz. Headers init typle bosh object yaratyabmz
+	const token = getJwtToken(); // Localdan tooken olib beradi
 	// @ts-ignore
 	if (token) headers['Authorization'] = `Bearer ${token}`;
 	return headers;
 }
 
 const tokenRefreshLink = new TokenRefreshLink({
-	accessTokenField: 'accessToken',
+	accessTokenField: 'accessToken',  // accesss token is save id RUN // But refresh token is kept in robust place i mean safe
 	isTokenValidOrUndefined: () => {
 		return true;
 	}, // @ts-ignore
@@ -28,12 +28,15 @@ const tokenRefreshLink = new TokenRefreshLink({
 });
 
 function createIsomorphicLink() {
-	if (typeof window !== 'undefined') {
-		const authLink = new ApolloLink((operation, forward) => {
-			operation.setContext(({ headers = {} }) => ({
+	if (typeof window !== 'undefined') { // browserda bolsa
+		const authLink = new ApolloLink((operation, forward) => {  //GQL requestdan oldin, headerlarizmni ichiga localdan olgan tookenlarni qoshib beryabdi. Shundan keyin requestlarimz tooken biland boradi
+			             // callbackni argument sifatida beryabmz. if function waits callback then we give callback function.
+			operation.setContext(({ headers = {} }) => ({ // forward middleware
 				headers: {
 					...headers,
 					...getHeaders(),
+					...headers, // Axios da headerlarni optionsda berardik. buyerda ham shu hodisa boyabdi
+					...getHeaders(), // thread qilyabmz. createIsomorphicLink shu link chaqirilganda HEADERS shakllanadi
 				},
 			}));
 			console.warn('requesting.. ', operation);
@@ -42,17 +45,17 @@ function createIsomorphicLink() {
 
 		// @ts-ignore
 		const link = new createUploadLink({
-			uri: process.env.REACT_APP_API_GRAPHQL_URL,
+			uri: process.env.REACT_APP_API_GRAPHQL_URL, // GQL clientmz qayerga boglanishini aytyabmiz
 		});
 
 		/* WEBSOCKET SUBSCRIPTION LINK */
 		const wsLink = new WebSocketLink({
 			uri: process.env.REACT_APP_API_WS ?? 'ws://127.0.0.1:3007',
 			options: {
-				reconnect: false,
-				timeout: 30000,
+				reconnect: false, // disconnectni cheklab quyyabmz
+				timeout: 30000,// 30 sekund boglanishni kutadi
 				connectionParams: () => {
-					return { headers: getHeaders() };
+					return { headers: getHeaders() }; // webSocket connection uchun Headerlar beryabmz. Postmanda manual berganmz
 				},
 			},
 		});
@@ -63,7 +66,7 @@ function createIsomorphicLink() {
 					console.log(`[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`),
 				);
 			}
-			if (networkError) console.log(`[Network error]: ${networkError}`);
+			if (networkError) console.log(`[Network error]: ${networkError}`); // bu esa network error
 			// @ts-ignore
 			if (networkError?.statusCode === 401) {
 			}
@@ -74,8 +77,8 @@ function createIsomorphicLink() {
 				const definition = getMainDefinition(query);
 				return definition.kind === 'OperationDefinition' && definition.operation === 'subscription';
 			},
-			wsLink,
-			authLink.concat(link),
+			wsLink, // subscribtion bolsa byuni ishlatamz
+			authLink.concat(link), // qolgan holatda buni.  concat orqali arraylarni birlashtiridik
 		);
 
 		return from([errorLink, tokenRefreshLink, splitLink]);
@@ -84,16 +87,16 @@ function createIsomorphicLink() {
 
 function createApolloClient() {
 	return new ApolloClient({
-		ssrMode: typeof window === 'undefined',
-		link: createIsomorphicLink(),
-		cache: new InMemoryCache(),
+		ssrMode: typeof window === 'undefined', // SSR page bolsa browserni funksiyalarini bloklash to avoid Crash
+		link: createIsomorphicLink(), // buyerda kop functionli qilib linkimzni yasadik. Avvalgi clientda yasaganzmda error handling, websocket, refresh tookent handling yuq edi
+		cache: new InMemoryCache(), // 5 xil turi bor Cacheni. // Cache bizga malumotlarmzni chacelash uchun kerak boladiugan joy
 		resolvers: {},
 	});
 }
 
 export function initializeApollo(initialState = null) {
-	const _apolloClient = apolloClient ?? createApolloClient();
-	if (initialState) _apolloClient.cache.restore(initialState);
+	const _apolloClient = apolloClient ?? createApolloClient(); // Instance malumotlar boladi 
+	if (initialState) _apolloClient.cache.restore(initialState); // restore functionmz hozr oldin mavjud bolgan initial statelarni restore qiliub qaytda tiklayabdi
 	if (typeof window === 'undefined') return _apolloClient;
 	if (!apolloClient) apolloClient = _apolloClient;
 
@@ -101,7 +104,7 @@ export function initializeApollo(initialState = null) {
 }
 
 export function useApollo(initialState: any) {
-	return useMemo(() => initializeApollo(initialState), [initialState]);
+	return useMemo(() => initializeApollo(initialState), [initialState]); // UseMemo - value yani qiymatlarni cachelashda ishlatiladigan Hook. Bu reactni uzini cachelash yoli yani memoryize
 }
 
 /**
