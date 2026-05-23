@@ -25,9 +25,9 @@ const PopularProperties = (props: PopularPropertiesProps) => {
 	/** APOLLO REQUESTS **/
 	const {
 	  loading: getPropertiesLoading,
-	  data: getPropertiesData,
-	  error: getPropertiesError,
-	  refetch: getPropertiesRefetch,
+		data: getPropertiesData,
+		error: getPropertiesError,
+		refetch: getPropertiesRefetch,
 	} = useQuery(GET_PROPERTIES, {
 	  fetchPolicy: 'cache-and-network',
 	  variables: { input: initialInput },

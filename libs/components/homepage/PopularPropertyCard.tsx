@@ -85,7 +85,7 @@ const PopularPropertyCard = (props: PopularPropertyCardProps) => {
 					className={'card-img'}
 					style={{ backgroundImage: `url(${REACT_APP_API_URL}/${property?.propertyImages[0]})` }}
 				>
-					{property?.propertyRank && property?.propertyRank >= topPropertyRank ? (
+					{property && property?.propertyRank >= topPropertyRank ? (
 						<div className={'status'}>
 							<img src="/img/icons/electricity.svg" alt="" />
 							<span>top</span>

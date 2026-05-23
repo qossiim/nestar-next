@@ -76,7 +76,7 @@ const PropertyBigCard = (props: PropertyBigCardProps) => {
 							<Typography className="view-cnt">{property?.propertyViews}</Typography>
 							<IconButton
 								color={'default'}
-								onClick={(e: { stopPropagation: () => void; }) => {
+								onClick={(e: { stopPropagation: () => void }) => {
 									e.stopPropagation();
 									likePropertyHandler(user, property?._id);
 								}}
