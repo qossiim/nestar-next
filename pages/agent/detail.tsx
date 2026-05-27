@@ -315,6 +315,8 @@ AgentDetail.defaultProps = {
 	initialInput: {
 		page: 1,
 		limit: 9,
+		sort: 'createdAt',
+		direction: 'DESC',
 		search: {
 			memberId: '',
 		},
