@@ -28,6 +28,33 @@ const tokenRefreshLink = new TokenRefreshLink({
 	},
 });
 
+//Custom WebSocket client
+class LoggingWebSocket {
+	private socket: WebSocket;
+
+	constructor(url: string) {
+		this.socket = new WebSocket(url);
+
+		this.socket.onopen = () => {
+			console.log('WebSocket Connection');
+		};
+
+		this.socket.onmessage = (msg) => {
+			console.log('WebSocket message: ', msg.data);
+		};
+		this.socket.onerror = (error) => {
+			console.log('WebSocket error: ', error);
+		};
+	}
+	send(data: string | ArrayBuffer | SharedArrayBuffer | Blob | ArrayBufferView) {
+		this.socket.send(data);
+	}
+
+	close() {
+		this.socket.close();
+	}
+}
+
 function createIsomorphicLink() {
 	if (typeof window !== 'undefined') { // browserda bolsa
 		const authLink = new ApolloLink((operation, forward) => {  //GQL requestdan oldin, headerlarizmni ichiga localdan olgan tookenlarni qoshib beryabdi. Shundan keyin requestlarimz tooken biland boradi
@@ -59,6 +86,7 @@ function createIsomorphicLink() {
 					return { headers: getHeaders() }; // webSocket connection uchun Headerlar beryabmz. Postmanda manual berganmz
 				},
 			},
+			webSocketImpl: LoggingWebSocket,
 		});
 
 		const errorLink = onError(({ graphQLErrors, networkError, response }) => {
